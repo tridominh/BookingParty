@@ -1,6 +1,5 @@
 using BirthdayParty.Models;
 using BirthdayParty.Models.DTOs;
-using BirthdayParty.Models.ModelScaffold;
 using BirthdayParty.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

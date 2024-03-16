@@ -1,7 +1,7 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using BirthdayParty.API;
 using BirthdayParty.DAL;
-using BirthdayParty.Models.ModelScaffold;
 using BirthdayParty.Repository;
 using BirthdayParty.Repository.Interfaces;
 using BirthdayParty.Services;
@@ -11,13 +11,27 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using BirthdayParty.API.Extensions;
+using BirthdayParty.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+
 // Add services to the container.
-builder.Services.AddDbContext<BookingPartyContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("BirthdayDb")));
+//builder.Services.AddDbContext<BookingPartyContext>(
+//   options => options.UseSqlServer(builder.Configuration.GetConnectionString("BirthdayDb")));
+builder.Services.RegisterLocalServices(builder.Configuration);
+//builder.Services.AddSingleton(x => new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+//builder.Services.AddScoped<IServiceBookingService, ServiceBookingService>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<JWTService>();
 builder.Services.AddIdentityCore<User>(options =>
 {
@@ -29,13 +43,23 @@ builder.Services.AddIdentityCore<User>(options =>
     options.Password.RequireNonAlphanumeric = false;
     //email config
 })
-.AddRoles<IdentityRole<int>>()
-.AddRoleManager<RoleManager<IdentityRole<int>>>()
+.AddRoles<Role>()
+.AddRoleManager<RoleManager<Role>>()
 .AddEntityFrameworkStores<BookingPartyContext>()
 .AddSignInManager<SignInManager<User>>()
 .AddUserManager<UserManager<User>>()
 .AddDefaultTokenProviders(); //token for email confirmation
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "myCorsPolicy",
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                      });
+});
 //add token interface
 builder.Services.AddSwaggerGen(
     c => {
@@ -100,6 +124,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("myCorsPolicy");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

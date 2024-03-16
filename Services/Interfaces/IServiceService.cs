@@ -1,5 +1,5 @@
-﻿using BirthdayParty.Models.DTOs;
-using BirthdayParty.Models.ModelScaffold;
+﻿using BirthdayParty.Models;
+using BirthdayParty.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,5 +1,5 @@
 ﻿using BirthdayParty.DAL;
-using BirthdayParty.Models.ModelScaffold;
+using BirthdayParty.Models;
 using BirthdayParty.Repository.Interfaces;
 using System;
 using System.Collections.Generic;

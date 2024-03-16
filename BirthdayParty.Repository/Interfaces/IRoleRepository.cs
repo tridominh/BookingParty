@@ -1,4 +1,4 @@
-﻿using BirthdayParty.Models.ModelScaffold;
+﻿using BirthdayParty.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

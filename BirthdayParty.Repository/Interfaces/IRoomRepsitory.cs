@@ -1,5 +1,4 @@
 using BirthdayParty.Models;
-using BirthdayParty.Models.ModelScaffold;
 
 namespace BirthdayParty.Repository.Interfaces
 {
