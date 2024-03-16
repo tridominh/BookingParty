@@ -25,12 +25,20 @@ builder.Services.AddControllers()
 // Add services to the container.
 //builder.Services.AddDbContext<BookingPartyContext>(
 //   options => options.UseSqlServer(builder.Configuration.GetConnectionString("BirthdayDb")));
+
 builder.Services.RegisterLocalServices(builder.Configuration);
 //builder.Services.AddSingleton(x => new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
+
+// Repositories DI
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
-//builder.Services.AddScoped<IServiceBookingService, ServiceBookingService>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+
+// Services DI 
+//builder.Services.AddScoped<IServiceBookingService, ServiceBookingService>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<JWTService>();
 builder.Services.AddIdentityCore<User>(options =>
@@ -100,14 +108,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
         };
     });
-
-// Services DI 
-builder.Services.AddScoped<IPackageService, PackageService>();
-builder.Services.AddScoped<IServiceService, ServiceService>();
-
-// Repositories DI
-builder.Services.AddScoped<IPackageRepository, PackageRepository>();
-builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
