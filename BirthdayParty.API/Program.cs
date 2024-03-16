@@ -1,6 +1,7 @@
 using System.Text;
 using BirthdayParty.API;
-using BirthdayParty.DAL.ModelScaffold;
+using BirthdayParty.DAL;
+using BirthdayParty.Models.ModelScaffold;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

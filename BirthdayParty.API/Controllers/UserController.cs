@@ -1,5 +1,5 @@
-using BirthdayParty.DAL.ModelScaffold;
 using BirthdayParty.Models.DTOs;
+using BirthdayParty.Models.ModelScaffold;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
