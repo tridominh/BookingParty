@@ -1,4 +1,5 @@
 using BirthdayParty.Models;
+using BirthdayParty.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,9 @@ namespace BirthdayParty.Services.Interfaces
 
         List<Service> GetAllServicesByPackageId(int packageId);
 
-        void CreatePackage(Package package);
+        Package CreatePackage(PackageCreateDto package);
 
-        Package UpdatePackage(int id, Package package);
+        Package UpdatePackage(PackageUpdateDto package);
 
         Package DeletePackage(int id);
     }

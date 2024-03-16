@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace BirthdayParty.Repository
 {
-    public class PackageRepository : GenericRepository<Package>, IPackageRepository
+    public class ServiceRepository : GenericRepository<Service>, IServiceRepository
     {
-        public PackageRepository(BookingPartyContext dbContext) : base(dbContext)
+        public ServiceRepository(BookingPartyContext dbContext) : base(dbContext)
         {
             
         }

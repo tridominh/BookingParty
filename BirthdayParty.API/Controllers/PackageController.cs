@@ -1,5 +1,4 @@
 using BirthdayParty.Models;
-using BirthdayParty.Models.Converters;
 using BirthdayParty.Models.DTOs;
 using BirthdayParty.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -33,9 +32,7 @@ namespace BirthdayParty.API.Controllers
         [HttpPost("Create")]
         public async Task<ActionResult<Package>> CreatePackage([FromBody] PackageCreateDto packageCreateDto)
         {
-            Package package = PackageConverter.toEntity(packageCreateDto);
-
-            packageService.CreatePackage(package);
+            packageService.CreatePackage(packageCreateDto);
 
             return Ok(new { Message = "Create Package Successfully", Data = packageCreateDto });
         }
@@ -43,9 +40,7 @@ namespace BirthdayParty.API.Controllers
         [HttpPut("Update")]
         public async Task<ActionResult<Package>> UpdatePackage([FromBody] PackageUpdateDto packageUpdateDto)
         {
-            Package updatedPackage = PackageConverter.toEntity(packageUpdateDto);
-
-            Package package = packageService.UpdatePackage(packageUpdateDto.PackageId, updatedPackage);
+            Package package = packageService.UpdatePackage(packageUpdateDto);
 
             if(package == null)
             {
