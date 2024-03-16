@@ -17,7 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BirthdayParty.DAL\BirthdayParty.DAL.csproj" />
     <ProjectReference Include="..\BirthdayParty.Models\BirthdayParty.Models.csproj" />
-    <ProjectReference Include="..\BirthdayParty.Repository\BirthdayParty.Repository.csproj" />
+    <ProjectReference Include="..\Services\BirthdayParty.Services.csproj" />
   </ItemGroup>
 
 </Project>
