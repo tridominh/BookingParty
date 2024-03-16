@@ -1,4 +1,4 @@
-using BirthdayParty.DAL.ModelScaffold;
+using BirthdayParty.Models;
 using BirthdayParty.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,11 +14,11 @@ namespace BirthdayParty.API.Controllers
         private readonly SignInManager<User> _signIn;
         private readonly JWTService _jwtService;
         private readonly UserManager<User> _manager;
-        private readonly RoleManager<IdentityRole<int>> _roleManager;
+        private readonly RoleManager<Role> _roleManager;
 
         public UserController(ILogger<WeatherForecastController> logger, 
                 SignInManager<User> signIn, UserManager<User> manager,
-                JWTService jwtService, RoleManager<IdentityRole<int>> roleManager)
+                JWTService jwtService, RoleManager<Role> roleManager)
         {
             _logger = logger;
             _signIn = signIn;
@@ -71,7 +71,7 @@ namespace BirthdayParty.API.Controllers
         [Authorize]
         public async Task<ActionResult> GetAllRole(string roleName)
         {
-            var result = await _roleManager.CreateAsync(new IdentityRole<int>(roleName));
+            var result = await _roleManager.CreateAsync(new Role(roleName));
             if(!result.Succeeded) return BadRequest("Bad request!!!");
             return Ok("Created!!!");
         }
