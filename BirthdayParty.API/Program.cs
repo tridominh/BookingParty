@@ -2,6 +2,10 @@ using System.Text;
 using BirthdayParty.API;
 using BirthdayParty.DAL;
 using BirthdayParty.Models.ModelScaffold;
+using BirthdayParty.Repository;
+using BirthdayParty.Repository.Interfaces;
+using BirthdayParty.Services;
+using BirthdayParty.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -74,8 +78,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 // Services DI 
+builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
 
 // Repositories DI
+builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
