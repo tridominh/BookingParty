@@ -1,5 +1,4 @@
 using BirthdayParty.Models;
-using BirthdayParty.Models.Converters;
 using BirthdayParty.Models.DTOs;
 using BirthdayParty.Repository.Interfaces;
 using BirthdayParty.Services.Interfaces;
