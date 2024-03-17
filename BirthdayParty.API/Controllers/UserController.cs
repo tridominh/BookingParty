@@ -1,6 +1,7 @@
 using BirthdayParty.Models;
 using BirthdayParty.Models.DTOs;
 using BirthdayParty.Models.Enums;
+using BirthdayParty.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,17 +17,20 @@ namespace BirthdayParty.API.Controllers
         private readonly JWTService _jwtService;
         private readonly UserManager<User> _manager;
         private readonly RoleManager<Role> _roleManager;
+        private readonly IUserService userService;
 
-        public UserController(ILogger<WeatherForecastController> logger, 
+		public UserController(ILogger<WeatherForecastController> logger, 
                 SignInManager<User> signIn, UserManager<User> manager,
-                JWTService jwtService, RoleManager<Role> roleManager)
+                JWTService jwtService, RoleManager<Role> roleManager, 
+                IUserService userService)
         {
             _logger = logger;
             _signIn = signIn;
             _manager = manager;
             _jwtService = jwtService;
             _roleManager = roleManager;
-        }
+			this.userService = userService;
+		}
 
         [HttpPost("Login")]
         public async Task<ActionResult<UserDTO>> Login([FromBody] LoginDTO loginDTO)
@@ -122,5 +126,43 @@ namespace BirthdayParty.API.Controllers
             };
             return jwt;
         }
-    }
+
+        [HttpGet("GetUserById")]
+		public async Task<ActionResult<User>> GetUserById(int id)
+		{
+			User user = userService.GetUserById(id);
+
+			if (user == null)
+			{
+				return NotFound();
+			}
+			return Ok(user);
+		}
+
+		[HttpPut("UpdateUser")]
+		public async Task<ActionResult<User>> UpdateUser([FromBody] UserUpdateDTO userUpdateDto)
+		{
+			User user = userService.UpdateUser(userUpdateDto);
+
+			if (user == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(new { Message = "Update User Successfully", Data = user });
+		}
+
+		[HttpDelete("DeleteUser")]
+		public async Task<ActionResult<User>> DeleteUser([FromBody] int id)
+		{
+			User user = userService.DeleteUser(id);
+
+			if (user == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(new { Message = "Delete User Successfully", Data = user });
+		}
+	}
 }
