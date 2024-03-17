@@ -49,6 +49,14 @@ namespace BirthdayParty.API.Controllers
         }
 
         [HttpPost("Register")]
+<<<<<<< HEAD
+        public async Task<ActionResult<User>> Register(RegisterDTO registerDTO)
+        {
+            if(await _manager.FindByEmailAsync(registerDTO.Email) != null){
+                return BadRequest("Email already exists!!!");
+            }
+            var user = new User{
+=======
         public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDTO)
         {
             if (await _manager.FindByEmailAsync(registerDTO.Email) != null)
@@ -57,11 +65,15 @@ namespace BirthdayParty.API.Controllers
             }
             var user = new User
             {
+>>>>>>> a1c615315ae3b7ceadb886f673664e44338f6541
                 UserName = registerDTO.Name,
                 Email = registerDTO.Email,
                 EmailConfirmed = true,
             };
             var result = await _manager.CreateAsync(user, registerDTO.Password);
+<<<<<<< HEAD
+            if(!result.Succeeded) return BadRequest(result.Errors);
+=======
             if (!result.Succeeded) return BadRequest(result.Errors);
             bool roleExists = await _roleManager.RoleExistsAsync("Customer");
             if (!roleExists) await _roleManager.CreateAsync(new Role("Customer"));
@@ -93,6 +105,7 @@ namespace BirthdayParty.API.Controllers
             bool roleExists = await _roleManager.RoleExistsAsync(roleEnum.ToString());
             if (!roleExists) await _roleManager.CreateAsync(new Role(roleEnum.ToString()));
             await _manager.AddToRoleAsync(user, roleEnum.ToString());
+>>>>>>> a1c615315ae3b7ceadb886f673664e44338f6541
             return Ok("Created successfully!!!");
         }
 
