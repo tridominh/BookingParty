@@ -1,5 +1,7 @@
 ﻿using BirthdayParty.Models;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -17,13 +19,14 @@ namespace BirthdayParty.API
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Key"]));
         }
 
-        public string CreateJwt(User user)
+        public string CreateJwt(User user, string role)
         {
             var userClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.GivenName, user.UserName),
+                new Claim(ClaimTypes.Role, role),
             };
             var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
             var tokenDescriptor = new SecurityTokenDescriptor
