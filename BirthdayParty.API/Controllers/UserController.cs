@@ -1,5 +1,6 @@
 using BirthdayParty.Models;
 using BirthdayParty.Models.DTOs;
+using BirthdayParty.Models.Enums;
 using BirthdayParty.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -32,28 +33,79 @@ namespace BirthdayParty.API.Controllers
 		}
 
         [HttpPost("Login")]
-        public async Task<ActionResult<JwtDTO>> Login(string email, string password)
+        public async Task<ActionResult<UserDTO>> Login([FromBody] LoginDTO loginDTO)
         {
-            var user = await _manager.FindByEmailAsync(email);
-            if(user==null) return Unauthorized("Invalid email!!!");
-            var result = await _signIn.CheckPasswordSignInAsync(user, password, false);
-            if(!result.Succeeded) return Unauthorized("Invalid email or password!!!");
-            return CreateUserToken(user);
+            var user = await _manager.FindByEmailAsync(loginDTO.Email);
+            if (user == null) return Unauthorized("Invalid email!!!");
+            var result = await _signIn.CheckPasswordSignInAsync(user, loginDTO.Password, false);
+            if (!result.Succeeded) return Unauthorized("Invalid email or password!!!");
+            var roleList = await _manager.GetRolesAsync(user);
+            var role = roleList.FirstOrDefault() ?? "Customer";
+            var userInfo = new UserDTO();
+            userInfo.Email = user.Email!;
+            userInfo.Name = user.UserName!;
+            userInfo.Token = _jwtService.CreateJwt(user, role);
+            return userInfo;
         }
 
         [HttpPost("Register")]
+<<<<<<< HEAD
         public async Task<ActionResult<User>> Register(RegisterDTO registerDTO)
         {
             if(await _manager.FindByEmailAsync(registerDTO.Email) != null){
                 return BadRequest("Email already exists!!!");
             }
             var user = new User{
+=======
+        public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDTO)
+        {
+            if (await _manager.FindByEmailAsync(registerDTO.Email) != null)
+            {
+                return BadRequest("Email already exists!!!");
+            }
+            var user = new User
+            {
+>>>>>>> a1c615315ae3b7ceadb886f673664e44338f6541
                 UserName = registerDTO.Name,
                 Email = registerDTO.Email,
                 EmailConfirmed = true,
             };
             var result = await _manager.CreateAsync(user, registerDTO.Password);
+<<<<<<< HEAD
             if(!result.Succeeded) return BadRequest(result.Errors);
+=======
+            if (!result.Succeeded) return BadRequest(result.Errors);
+            bool roleExists = await _roleManager.RoleExistsAsync("Customer");
+            if (!roleExists) await _roleManager.CreateAsync(new Role("Customer"));
+            await _manager.AddToRoleAsync(user, "Customer");
+            var userDTO = new UserDTO
+            {
+                Name = user.UserName,
+                Email = user.Email,
+                Token = _jwtService.CreateJwt(user, "Customer")
+            };
+            return Ok(userDTO);
+        }
+
+        [HttpPost("RegisterWithRole")]
+        public async Task<ActionResult<User>> RegisterWithRole(RegisterDTO registerDTO, RoleEnum roleEnum)
+        {
+            if (await _manager.FindByEmailAsync(registerDTO.Email) != null)
+            {
+                return BadRequest("Email already exists!!!");
+            }
+            var user = new User
+            {
+                UserName = registerDTO.Name,
+                Email = registerDTO.Email,
+                EmailConfirmed = true,
+            };
+            var result = await _manager.CreateAsync(user, registerDTO.Password);
+            if (!result.Succeeded) return BadRequest(result.Errors);
+            bool roleExists = await _roleManager.RoleExistsAsync(roleEnum.ToString());
+            if (!roleExists) await _roleManager.CreateAsync(new Role(roleEnum.ToString()));
+            await _manager.AddToRoleAsync(user, roleEnum.ToString());
+>>>>>>> a1c615315ae3b7ceadb886f673664e44338f6541
             return Ok("Created successfully!!!");
         }
 
@@ -83,7 +135,7 @@ namespace BirthdayParty.API.Controllers
         private JwtDTO CreateUserToken(User user)
         {
             var jwt = new JwtDTO{
-                Token = _jwtService.CreateJwt(user),
+                Token = _jwtService.CreateJwt(user, "Customer"),
             };
             return jwt;
         }
