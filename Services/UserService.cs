@@ -26,13 +26,12 @@ namespace BirthdayParty.Services
 
 		public User UpdateUser(UserUpdateDTO updatedUser)
 		{
-			var user = new User
-			{
-				Id = updatedUser.Id,
-				UserName = updatedUser.UserName,
-				PhoneNumber = updatedUser.PhoneNumber,
-				Email = updatedUser.Email,
-			};
+			var user = userRepository.Get(updatedUser.Id);
+
+			user.Id = updatedUser.Id;
+			user.UserName = updatedUser.UserName;
+			user.PhoneNumber = updatedUser.PhoneNumber;
+			user.Email = updatedUser.Email;
 			return userRepository.Update(user);
 		}
 

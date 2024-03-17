@@ -42,17 +42,17 @@ namespace BirthdayParty.API.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<ActionResult<User>> Register(string email, string password, string name)
+        public async Task<ActionResult<User>> Register(RegisterDTO registerDTO)
         {
-            if(await _manager.FindByEmailAsync(email) != null){
+            if(await _manager.FindByEmailAsync(registerDTO.Email) != null){
                 return BadRequest("Email already exists!!!");
             }
             var user = new User{
-                UserName = name,
-                Email = email,
+                UserName = registerDTO.Name,
+                Email = registerDTO.Email,
                 EmailConfirmed = true,
             };
-            var result = await _manager.CreateAsync(user, password);
+            var result = await _manager.CreateAsync(user, registerDTO.Password);
             if(!result.Succeeded) return BadRequest(result.Errors);
             return Ok("Created successfully!!!");
         }
