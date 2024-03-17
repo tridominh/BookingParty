@@ -19,9 +19,9 @@ namespace BirthdayParty.API.Controllers
         private readonly RoleManager<Role> _roleManager;
         private readonly IUserService userService;
 
-		public UserController(ILogger<WeatherForecastController> logger, 
+        public UserController(ILogger<WeatherForecastController> logger,
                 SignInManager<User> signIn, UserManager<User> manager,
-                JWTService jwtService, RoleManager<Role> roleManager, 
+                JWTService jwtService, RoleManager<Role> roleManager,
                 IUserService userService)
         {
             _logger = logger;
@@ -29,8 +29,8 @@ namespace BirthdayParty.API.Controllers
             _manager = manager;
             _jwtService = jwtService;
             _roleManager = roleManager;
-			this.userService = userService;
-		}
+            this.userService = userService;
+        }
 
         [HttpPost("Login")]
         public async Task<ActionResult<UserDTO>> Login([FromBody] LoginDTO loginDTO)
@@ -49,133 +49,121 @@ namespace BirthdayParty.API.Controllers
         }
 
         [HttpPost("Register")]
-<<<<<<< HEAD
-        public async Task<ActionResult<User>> Register(RegisterDTO registerDTO)
-        {
-            if(await _manager.FindByEmailAsync(registerDTO.Email) != null){
-                return BadRequest("Email already exists!!!");
+            public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDTO)
+            {
+                if (await _manager.FindByEmailAsync(registerDTO.Email) != null)
+                {
+                    return BadRequest("Email already exists!!!");
+                }
+                var user = new User
+                {
+                    UserName = registerDTO.Name,
+                    Email = registerDTO.Email,
+                    EmailConfirmed = true,
+                };
+                var result = await _manager.CreateAsync(user, registerDTO.Password);
+                if (!result.Succeeded) return BadRequest(result.Errors);
+                if (!result.Succeeded) return BadRequest(result.Errors);
+                bool roleExists = await _roleManager.RoleExistsAsync("Customer");
+                if (!roleExists) await _roleManager.CreateAsync(new Role("Customer"));
+                await _manager.AddToRoleAsync(user, "Customer");
+                var userDTO = new UserDTO
+                {
+                    Name = user.UserName,
+                    Email = user.Email,
+                    Token = _jwtService.CreateJwt(user, "Customer")
+                };
+                return Ok(userDTO);
             }
-            var user = new User{
-=======
-        public async Task<ActionResult<UserDTO>> Register(RegisterDTO registerDTO)
-        {
-            if (await _manager.FindByEmailAsync(registerDTO.Email) != null)
+
+            [HttpPost("RegisterWithRole")]
+            public async Task<ActionResult<User>> RegisterWithRole(RegisterDTO registerDTO, RoleEnum roleEnum)
             {
-                return BadRequest("Email already exists!!!");
+                if (await _manager.FindByEmailAsync(registerDTO.Email) != null)
+                {
+                    return BadRequest("Email already exists!!!");
+                }
+                var user = new User
+                {
+                    UserName = registerDTO.Name,
+                    Email = registerDTO.Email,
+                    EmailConfirmed = true,
+                };
+                var result = await _manager.CreateAsync(user, registerDTO.Password);
+                if (!result.Succeeded) return BadRequest(result.Errors);
+                bool roleExists = await _roleManager.RoleExistsAsync(roleEnum.ToString());
+                if (!roleExists) await _roleManager.CreateAsync(new Role(roleEnum.ToString()));
+                await _manager.AddToRoleAsync(user, roleEnum.ToString());
+                return Ok("Created successfully!!!");
             }
-            var user = new User
-            {
->>>>>>> a1c615315ae3b7ceadb886f673664e44338f6541
-                UserName = registerDTO.Name,
-                Email = registerDTO.Email,
-                EmailConfirmed = true,
-            };
-            var result = await _manager.CreateAsync(user, registerDTO.Password);
-<<<<<<< HEAD
-            if(!result.Succeeded) return BadRequest(result.Errors);
-=======
-            if (!result.Succeeded) return BadRequest(result.Errors);
-            bool roleExists = await _roleManager.RoleExistsAsync("Customer");
-            if (!roleExists) await _roleManager.CreateAsync(new Role("Customer"));
-            await _manager.AddToRoleAsync(user, "Customer");
-            var userDTO = new UserDTO
-            {
-                Name = user.UserName,
-                Email = user.Email,
-                Token = _jwtService.CreateJwt(user, "Customer")
-            };
-            return Ok(userDTO);
-        }
 
-        [HttpPost("RegisterWithRole")]
-        public async Task<ActionResult<User>> RegisterWithRole(RegisterDTO registerDTO, RoleEnum roleEnum)
-        {
-            if (await _manager.FindByEmailAsync(registerDTO.Email) != null)
+            [HttpGet("GetAll")]
+            public async Task<ActionResult<IEnumerable<User>>> GetAll()
             {
-                return BadRequest("Email already exists!!!");
+                var list = _manager.Users;
+                return Ok(list.ToList());
             }
-            var user = new User
+
+            [HttpGet("GetAllRoles")]
+            public async Task<ActionResult<IEnumerable<IdentityRole>>> GetAllRole()
             {
-                UserName = registerDTO.Name,
-                Email = registerDTO.Email,
-                EmailConfirmed = true,
-            };
-            var result = await _manager.CreateAsync(user, registerDTO.Password);
-            if (!result.Succeeded) return BadRequest(result.Errors);
-            bool roleExists = await _roleManager.RoleExistsAsync(roleEnum.ToString());
-            if (!roleExists) await _roleManager.CreateAsync(new Role(roleEnum.ToString()));
-            await _manager.AddToRoleAsync(user, roleEnum.ToString());
->>>>>>> a1c615315ae3b7ceadb886f673664e44338f6541
-            return Ok("Created successfully!!!");
+                var list = _roleManager.Roles;
+                return Ok(list.ToList());
+            }
+
+            [HttpPost("AddRoles")]
+            [Authorize]
+            public async Task<ActionResult> GetAllRole(string roleName)
+            {
+                var result = await _roleManager.CreateAsync(new Role(roleName));
+                if (!result.Succeeded) return BadRequest("Bad request!!!");
+                return Ok("Created!!!");
+            }
+
+            private JwtDTO CreateUserToken(User user)
+            {
+                var jwt = new JwtDTO {
+                    Token = _jwtService.CreateJwt(user, "Customer"),
+                };
+                return jwt;
+            }
+
+            [HttpGet("GetUserById")]
+            public async Task<ActionResult<User>> GetUserById(int id)
+            {
+                User user = userService.GetUserById(id);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                return Ok(user);
+            }
+
+            [HttpPut("UpdateUser")]
+            public async Task<ActionResult<User>> UpdateUser([FromBody] UserUpdateDTO userUpdateDto)
+            {
+                User user = userService.UpdateUser(userUpdateDto);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(new { Message = "Update User Successfully", Data = user });
+            }
+
+            [HttpDelete("DeleteUser")]
+            public async Task<ActionResult<User>> DeleteUser([FromBody] int id)
+            {
+                User user = userService.DeleteUser(id);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(new { Message = "Delete User Successfully", Data = user });
+            }
         }
-
-        [HttpGet("GetAll")]
-        public async Task<ActionResult<IEnumerable<User>>> GetAll()
-        {
-            var list = _manager.Users;
-            return Ok(list.ToList());
-        }
-
-        [HttpGet("GetAllRoles")]
-        public async Task<ActionResult<IEnumerable<IdentityRole>>> GetAllRole()
-        {
-            var list = _roleManager.Roles;
-            return Ok(list.ToList());
-        }
-
-        [HttpPost("AddRoles")]
-        [Authorize]
-        public async Task<ActionResult> GetAllRole(string roleName)
-        {
-            var result = await _roleManager.CreateAsync(new Role(roleName));
-            if(!result.Succeeded) return BadRequest("Bad request!!!");
-            return Ok("Created!!!");
-        }
-
-        private JwtDTO CreateUserToken(User user)
-        {
-            var jwt = new JwtDTO{
-                Token = _jwtService.CreateJwt(user, "Customer"),
-            };
-            return jwt;
-        }
-
-        [HttpGet("GetUserById")]
-		public async Task<ActionResult<User>> GetUserById(int id)
-		{
-			User user = userService.GetUserById(id);
-
-			if (user == null)
-			{
-				return NotFound();
-			}
-			return Ok(user);
-		}
-
-		[HttpPut("UpdateUser")]
-		public async Task<ActionResult<User>> UpdateUser([FromBody] UserUpdateDTO userUpdateDto)
-		{
-			User user = userService.UpdateUser(userUpdateDto);
-
-			if (user == null)
-			{
-				return NotFound();
-			}
-
-			return Ok(new { Message = "Update User Successfully", Data = user });
-		}
-
-		[HttpDelete("DeleteUser")]
-		public async Task<ActionResult<User>> DeleteUser([FromBody] int id)
-		{
-			User user = userService.DeleteUser(id);
-
-			if (user == null)
-			{
-				return NotFound();
-			}
-
-			return Ok(new { Message = "Delete User Successfully", Data = user });
-		}
-	}
-}
+    }
