@@ -165,5 +165,43 @@ namespace BirthdayParty.API.Controllers
 
                 return Ok(new { Message = "Delete User Successfully", Data = user });
             }
-        }
+
+		    [HttpPost("CreateUser")]
+		    public async Task<ActionResult<UserDTO>> CreateUser(UserCreateDTO userCreateDTO)
+		    {
+			    if (await _manager.FindByEmailAsync(userCreateDTO.Email) != null)
+			    {
+				    return BadRequest("Email already exists!!!");
+			    }
+
+			    var user = new User
+			    {
+				    UserName = userCreateDTO.UserName,
+				    PhoneNumber = userCreateDTO.PhoneNumber,
+				    Email = userCreateDTO.Email,
+				    EmailConfirmed = true,
+			    };
+
+			    var result = await _manager.CreateAsync(user, userCreateDTO.Password);
+
+			    if (!result.Succeeded)
+				
+                return BadRequest(result.Errors);
+
+			    bool roleExists = await _roleManager.RoleExistsAsync("Customer");
+			    
+                if (!roleExists)
+				    await _roleManager.CreateAsync(new Role("Customer"));
+
+			    await _manager.AddToRoleAsync(user, "Customer");
+
+			    var userDTO = new UserDTO
+			    {
+				    Name = user.UserName,
+				    Email = user.Email,
+				    Token = _jwtService.CreateJwt(user, "Customer")
+			    };
+                return Ok(userDTO);
+		    }
     }
+}
