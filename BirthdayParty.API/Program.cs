@@ -35,6 +35,7 @@ builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Services DI 
 //builder.Services.AddScoped<IServiceBookingService, ServiceBookingService>();
@@ -42,6 +43,7 @@ builder.Services.AddScoped<IPackageService, PackageService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBookingService, BirthdayParty.Services.BookingService>();
 builder.Services.AddScoped<JWTService>();
 builder.Services.AddIdentityCore<User>(options =>
 {
