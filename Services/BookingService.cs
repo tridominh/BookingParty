@@ -26,6 +26,7 @@ namespace BirthdayParty.Services
                 RoomId = booking.RoomId,
                 BookingDate = DateTime.UtcNow,
                 PartyDateTime = booking.PartyDateTime,
+                PartyEndTime = booking.PartyEndTime,
                 BookingStatus = booking.BookingStatus,
                 Feedback = booking.Feedback,
             };
@@ -41,6 +42,7 @@ namespace BirthdayParty.Services
             existingBooking.RoomId = booking.RoomId;
             existingBooking.BookingDate = DateTime.UtcNow;
             existingBooking.PartyDateTime = booking.PartyDateTime;
+            existingBooking.PartyEndTime = booking.PartyEndTime;
             existingBooking.BookingStatus= booking.BookingStatus;
             existingBooking.Feedback = booking.Feedback;
 
