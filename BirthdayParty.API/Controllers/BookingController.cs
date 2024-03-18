@@ -14,23 +14,61 @@ namespace BirthdayParty.API.Controllers
         private readonly IBookingService _bookingService;
         private readonly IServiceService _serviceService;
         private readonly IGenericRepository<BookingService> _bookingServiceService;
+        private readonly IGenericRepository<User> _userRepository;
 
         public BookingController(IBookingService bookingService, IServiceService serviceService
-                , IGenericRepository<BookingService> bookingServiceService) {
+                , IGenericRepository<BookingService> bookingServiceService,
+                IGenericRepository<User> userRepository) {
             _bookingService = bookingService;
             _serviceService = serviceService;
             _bookingServiceService = bookingServiceService;
+            _userRepository = userRepository;
         }
 
         [HttpGet("GetAll")]
         public async Task<ActionResult<List<Booking>>> GetAll()
         {
             List<Booking> bookings = _bookingService.GetAllBookings();
+            
+            return Ok(bookings);
+        }
 
-            //if (packages == null || packages.Count == 0)
-            //{
-            //    return NotFound();
-            //}
+        [HttpGet("GetAllByUserId")]
+        public async Task<ActionResult<List<Booking>>> GetAllByUserId(int id)
+        {
+            List<Booking> bookings = _bookingService.GetAllBookings().Where(b => b.UserId == id).ToList();
+
+            return Ok(bookings);
+        }
+
+        [HttpGet("GetAllOngoingByUserId")]
+        public async Task<ActionResult<List<Booking>>> GetAllOngoingByUserId(int id)
+        {
+            List<Booking> bookings = _bookingService.GetAllBookings()
+                .Where(b => b.UserId == id &&
+                        b.BookingStatus == "Accepted" &&
+                        b.PartyDateTime > DateTime.Now).ToList();
+
+            return Ok(bookings);
+        }
+
+        [HttpGet("GetAllPending")]
+        public async Task<ActionResult<List<Booking>>> GetAllPendingBookings()
+        {
+            List<Booking> bookings = _bookingService.GetAllBookings().Where(b => b.BookingStatus == "Pending").ToList();
+
+            return Ok(bookings);
+        }
+
+        [HttpGet("GetAllOngoing")]
+        public async Task<ActionResult<List<Booking>>> GetAllOngoingBookings()
+        {
+            List<Booking> bookings = _bookingService.GetAllBookings()
+                .Where(b => (
+                       b.BookingStatus == "DepositPaying" || 
+                       b.BookingStatus == "FullPaying") && 
+                       b.PartyDateTime > DateTime.Now 
+                ).ToList();
 
             return Ok(bookings);
         }
@@ -70,6 +108,26 @@ namespace BirthdayParty.API.Controllers
          
         }
 
+        [HttpPut("UpdateStatus")]
+        public async Task<ActionResult<Booking>> UpdateStatus([FromBody] UpdateBookingStatusDTO statusDTO)
+        {
+            var booking = _bookingService.GetBooking(statusDTO.BookingId);
+
+            var bookingDTO = new BookingDTO{
+                BookingId = booking.BookingId,
+                UserId = booking.UserId,
+                RoomId = booking.RoomId,
+                PartyDateTime = booking.PartyDateTime,
+                BookingStatus= statusDTO.Status,
+                Feedback = booking.Feedback,
+            };
+
+            var book = _bookingService.UpdateBooking(bookingDTO);
+
+            return Ok(book);
+         
+        }
+
         [HttpDelete("Delete")]
         public async Task<ActionResult<Booking>> DeleteBooking([FromBody] int id)
         {
@@ -85,5 +143,11 @@ namespace BirthdayParty.API.Controllers
             return Ok(booking);
         }
 
+    }
+
+    public class UpdateBookingStatusDTO
+    {
+        public int BookingId { get; set; }
+        public string Status { get; set; } = null!;
     }
 }

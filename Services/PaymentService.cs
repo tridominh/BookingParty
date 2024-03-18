@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BirthdayParty.Services
 {
-	public class PaymentService
+	public class PaymentServices
 	{
 	}
 }
