@@ -7,8 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BirthdayParty.Models\BirthdayParty.Models.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="7.0.14" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\BirthdayParty.Repository\BirthdayParty.Repository.csproj" />
   </ItemGroup>
-
 </Project>

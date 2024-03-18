@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using BirthdayParty.API.Extensions;
 using BirthdayParty.Models;
+using BirthdayParty.Services.PaymentService.Momo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,7 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Services DI 
 //builder.Services.AddScoped<IServiceBookingService, ServiceBookingService>();
+builder.Services.AddScoped<MomoService>();
 builder.Services.AddScoped<IPackageService, PackageService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IRoomService, RoomService>();

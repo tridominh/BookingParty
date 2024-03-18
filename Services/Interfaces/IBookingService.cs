@@ -7,9 +7,13 @@ namespace BirthdayParty.Services.Interfaces
     {
         List<Booking> GetAllBookings();
 
+        Booking GetBooking (int id);
+
         Booking CreateBooking (BookingDTO booking);
 
         Booking UpdateBooking(BookingDTO booking);
+
+        Booking UpdateBookingStatus(int id, string status);
 
         Booking DeleteBooking(int id);
     }
