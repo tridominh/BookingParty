@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BirthdayParty.DAL", "Birthd
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BirthdayParty.API", "BirthdayParty.API\BirthdayParty.API.csproj", "{1731543F-FA72-409F-B93E-41C7CD9C825B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BirthdayParty.Services", "Services\BirthdayParty.Services.csproj", "{8A812185-D02F-4BF6-A3BF-E07F2B280009}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{1731543F-FA72-409F-B93E-41C7CD9C825B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1731543F-FA72-409F-B93E-41C7CD9C825B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1731543F-FA72-409F-B93E-41C7CD9C825B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A812185-D02F-4BF6-A3BF-E07F2B280009}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A812185-D02F-4BF6-A3BF-E07F2B280009}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A812185-D02F-4BF6-A3BF-E07F2B280009}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A812185-D02F-4BF6-A3BF-E07F2B280009}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

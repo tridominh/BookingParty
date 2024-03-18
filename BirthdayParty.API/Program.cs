@@ -1,18 +1,51 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using BirthdayParty.API;
-using BirthdayParty.DAL.ModelScaffold;
+using BirthdayParty.DAL;
+using BirthdayParty.Repository;
+using BirthdayParty.Repository.Interfaces;
+using BirthdayParty.Services;
+using BirthdayParty.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using BirthdayParty.API.Extensions;
+using BirthdayParty.Models;
+using BirthdayParty.Services.PaymentService.Momo;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+
 // Add services to the container.
-builder.Services.AddDbContext<BookingPartyContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("BirthdayDb")));
+//builder.Services.AddDbContext<BookingPartyContext>(
+//   options => options.UseSqlServer(builder.Configuration.GetConnectionString("BirthdayDb")));
+
+builder.Services.RegisterLocalServices(builder.Configuration);
+//builder.Services.AddSingleton(x => new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
+
+// Repositories DI
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+
+// Services DI 
+//builder.Services.AddScoped<IServiceBookingService, ServiceBookingService>();
+builder.Services.AddScoped<MomoService>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBookingService, BirthdayParty.Services.BookingService>();
 builder.Services.AddScoped<JWTService>();
 builder.Services.AddIdentityCore<User>(options =>
 {
@@ -24,13 +57,23 @@ builder.Services.AddIdentityCore<User>(options =>
     options.Password.RequireNonAlphanumeric = false;
     //email config
 })
-.AddRoles<IdentityRole<int>>()
-.AddRoleManager<RoleManager<IdentityRole<int>>>()
+.AddRoles<Role>()
+.AddRoleManager<RoleManager<Role>>()
 .AddEntityFrameworkStores<BookingPartyContext>()
 .AddSignInManager<SignInManager<User>>()
 .AddUserManager<UserManager<User>>()
 .AddDefaultTokenProviders(); //token for email confirmation
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "myCorsPolicy",
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                      });
+});
 //add token interface
 builder.Services.AddSwaggerGen(
     c => {
@@ -72,8 +115,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
-
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -89,6 +130,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("myCorsPolicy");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
