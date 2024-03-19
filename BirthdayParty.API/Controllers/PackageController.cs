@@ -32,6 +32,11 @@ namespace BirthdayParty.API.Controllers
         [HttpPost("Create")]
         public async Task<ActionResult<Package>> CreatePackage([FromBody] PackageCreateDto packageCreateDto)
         {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             packageService.CreatePackage(packageCreateDto);
 
             return Ok(new { Message = "Create Package Successfully", Data = packageCreateDto });
