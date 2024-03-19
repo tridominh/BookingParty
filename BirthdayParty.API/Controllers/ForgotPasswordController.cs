@@ -6,6 +6,6 @@ namespace BirthdayParty.API.Controllers
     [ApiController]
     public class ForgotPasswordController : Controller
     {
-       private readonly 
+       //private readonly 
     }
 }
