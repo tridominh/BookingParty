@@ -19,14 +19,17 @@ namespace BirthdayParty.API.Controllers
         private readonly MomoConfig _config;
         private readonly IBookingService _bookingService;
         private readonly IGenericRepository<Payment> _paymentService;
+        private readonly IRoomService _roomService;
 
         public MomoController(MomoService momoService, IOptions<MomoConfig> config,
                 IBookingService bookingService,
-                IGenericRepository<Payment> paymentService){
+                IGenericRepository<Payment> paymentService,
+                IRoomService roomService){
             _momoService = momoService;
             _config = config.Value;
             _bookingService = bookingService;
             _paymentService = paymentService;
+            _roomService = roomService;
         }
 
         [HttpPost("CreateMomoLink")]
@@ -37,9 +40,27 @@ namespace BirthdayParty.API.Controllers
             {
                 return BadRequest(new {});
             }
+             //check already have booking complete
+            var room = _roomService.GetRoomById(booking.RoomId);           
+            var bookings = _bookingService.GetAllBookings()
+                .Where(b => b.RoomId == room.RoomId).ToList();
+            if(bookings.Any(b =>((booking.PartyDateTime >= b.PartyDateTime &&
+                booking.PartyDateTime <= b.PartyEndTime) || 
+                (booking.PartyEndTime >= b.PartyDateTime &&
+                booking.PartyEndTime <= b.PartyEndTime)) && 
+                (b.BookingStatus == "Deposit" || b.BookingStatus =="Paid" || 
+                 b.BookingStatus == "FullPaying" || b.BookingStatus == "DepositPaying")))
+            {
+                return BadRequest(new {error = "Room is already booked at this time"});
+            }
+
             //Already paid
             if(booking.BookingStatus == "Paid"){
                 return Ok(new { url = dto.RedirectUrl });    
+            }
+
+            if(DateTime.Now > booking.PartyDateTime){
+                return Ok(new { url = dto.RedirectUrl });
             }
             //Already paid but wrong status
             var payments = _paymentService.GetAll().Where(p => p.BookingId == booking.BookingId);

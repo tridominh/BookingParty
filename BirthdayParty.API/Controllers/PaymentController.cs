@@ -13,11 +13,14 @@ namespace BirthdayParty.API.Controllers
     {
         private readonly IGenericRepository<Payment> _paymentService;
         private readonly IBookingService _bookingService;
+        private readonly IRoomService _roomService;
 
         public PaymentController(IGenericRepository<Payment> paymentService,
-            IBookingService bookingService) {
+            IBookingService bookingService,
+            IRoomService roomService) {
             _paymentService = paymentService;
             _bookingService = bookingService;
+            _roomService = roomService;
         }
 
         [HttpPut("ChangeBookingStatusAfterPayment")]
@@ -33,6 +36,9 @@ namespace BirthdayParty.API.Controllers
             if(booking.BookingStatus == "Paid"){
                 return Ok(new {});
             }
+            if(DateTime.Now > booking.PartyDateTime){
+                return Ok(new {});
+            }
             //Already paid but wrong status
             var payments = _paymentService.GetAll().Where(p => p.BookingId == booking.BookingId);
             if(payments.Sum(p => p.DepositMoney) >= booking.TotalPrice ||
@@ -41,10 +47,23 @@ namespace BirthdayParty.API.Controllers
                 _bookingService.UpdateBookingStatus(dto.BookingId, "Paid");
                 return Ok(new {});
             }
+            //check already have booking complete
+            var room = _roomService.GetRoomById(booking.RoomId);           
+            var bookings = _bookingService.GetAllBookings()
+                .Where(b => b.RoomId == room.RoomId).ToList();
+            if(bookings.Any(b =>((booking.PartyDateTime >= b.PartyDateTime &&
+                booking.PartyDateTime <= b.PartyEndTime) || 
+                (booking.PartyEndTime >= b.PartyDateTime &&
+                booking.PartyEndTime <= b.PartyEndTime)) && 
+                (b.BookingStatus == "Deposit" || b.BookingStatus =="Paid" || 
+                 b.BookingStatus == "FullPaying" || b.BookingStatus == "DepositPaying")))
+            {
+                return BadRequest(new {error = "Room is already booked at this time"});
+            }
+
             if(dto.Method == "fullprice")
             {
                 _bookingService.UpdateBookingStatus(dto.BookingId, "FullPaying");
-                
             }
             else if(dto.Method == "deposit")
             {
@@ -85,6 +104,7 @@ namespace BirthdayParty.API.Controllers
                 }
                 _bookingService.UpdateBookingStatus(dto.BookingId, "Paid");
             }
+            //Deposit
             else if(booking.BookingStatus == "DepositPaying" || booking.BookingStatus == "Deposit")
             {
                 var payments = _paymentService.GetAll().Where(p => p.BookingId == booking.BookingId);

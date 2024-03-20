@@ -82,8 +82,8 @@ namespace BirthdayParty.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            _serviceService.CreateService(service);
-            return Ok();
+            var s = _serviceService.CreateService(service);
+            return Ok(s);
         }
 
 		[HttpGet("GetServiceById")]
