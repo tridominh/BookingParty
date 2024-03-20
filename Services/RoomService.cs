@@ -46,7 +46,7 @@ namespace BirthdayParty.Services
                 RoomNumber = room.RoomNumber,
                 Price = room.Price,
                 Capacity = room.Capacity,
-                RoomStatus = "Pending",
+                RoomStatus = room.RoomStatus,
             };
             return _roomRepository.Add(roomObj);
         }

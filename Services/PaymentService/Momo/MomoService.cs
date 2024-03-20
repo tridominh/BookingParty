@@ -15,7 +15,7 @@ public class MomoService
         _config = config.Value;
     }
 
-    public MomoOneTimePaymentRequest CreateRequestModel(long amount, string description)
+    public MomoOneTimePaymentRequest CreateRequestModel(long amount, string description, ExtraDataDTO extraData)
     {
         momoRequest = new MomoOneTimePaymentRequest{
             requestId = CreateRequestId(),
@@ -23,7 +23,7 @@ public class MomoService
             partnerCode = _config.PartnerCode,
             amount = amount,
             orderInfo = description,
-            extraData = "",
+            extraData = Base64Encode(JsonConvert.SerializeObject(extraData)),
             redirectUrl = _config.ReturnUrl,
             ipnUrl = _config.IpnUrl,
             requestType = "captureWallet",
@@ -47,8 +47,6 @@ public class MomoService
             "&requestType="+momoRequest.requestType;
         return HmacSHA256(secretKey, rawHash);
     }
-
-    
 
     public static string HmacSHA512(string key, string inputData)
     {
@@ -80,6 +78,12 @@ public class MomoService
         }
     }
 
+    public static string Base64Encode(string plainText)
+    {
+        byte[] plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+        return Convert.ToBase64String(plainTextBytes);
+    }
+
     private string CreateRequestId()
     {
         DateTime currentTime = DateTime.UtcNow; // Get current time in UTC
@@ -98,4 +102,8 @@ public class MomoService
 
 }
 
- 
+public class ExtraDataDTO{
+    public int BookingId { get; set; }
+    //Deposit, Full
+    public string PayType { get; set; }
+}

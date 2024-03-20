@@ -32,6 +32,11 @@ namespace BirthdayParty.API.Controllers
         [HttpPost("Create")]
         public async Task<ActionResult<Package>> CreatePackage([FromBody] PackageCreateDto packageCreateDto)
         {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             packageService.CreatePackage(packageCreateDto);
 
             return Ok(new { Message = "Create Package Successfully", Data = packageCreateDto });
@@ -40,6 +45,11 @@ namespace BirthdayParty.API.Controllers
         [HttpPut("Update")]
         public async Task<ActionResult<Package>> UpdatePackage([FromBody] PackageUpdateDto packageUpdateDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             Package package = packageService.UpdatePackage(packageUpdateDto);
 
             if(package == null)
@@ -53,6 +63,11 @@ namespace BirthdayParty.API.Controllers
         [HttpDelete("Delete")]
         public async Task<ActionResult<Package>> DeletePackage([FromBody] int id)
         {
+            if(id <= 0)
+            {
+                return BadRequest();
+            }
+
             Package package = packageService.DeletePackage(id);
 
             if(package == null)
@@ -66,6 +81,11 @@ namespace BirthdayParty.API.Controllers
         [HttpGet("GetAllServicesByPackageId")]
         public async Task<ActionResult<List<Service>>> GetAllServicesByPackageId(int id)
         {
+            if(id <= 0)
+            {
+                return BadRequest();
+            }
+
             List<Service> services = packageService.GetAllServicesByPackageId(id);
 
             if(services == null || services.Count == 0)

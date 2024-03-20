@@ -3,6 +3,7 @@ using BirthdayParty.Models.DTOs;
 using BirthdayParty.Repository.Interfaces;
 using BirthdayParty.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace BirthdayParty.API.Controllers
@@ -13,16 +14,19 @@ namespace BirthdayParty.API.Controllers
     {
         private readonly IBookingService _bookingService;
         private readonly IServiceService _serviceService;
+        private readonly IRoomService _roomService;
         private readonly IGenericRepository<BookingService> _bookingServiceService;
         private readonly IGenericRepository<User> _userRepository;
 
         public BookingController(IBookingService bookingService, IServiceService serviceService
                 , IGenericRepository<BookingService> bookingServiceService,
-                IGenericRepository<User> userRepository) {
+                IGenericRepository<User> userRepository,
+                IRoomService roomService) {
             _bookingService = bookingService;
             _serviceService = serviceService;
             _bookingServiceService = bookingServiceService;
             _userRepository = userRepository;
+            _roomService = roomService;
         }
 
         [HttpGet("GetAll")]
@@ -31,6 +35,25 @@ namespace BirthdayParty.API.Controllers
             List<Booking> bookings = _bookingService.GetAllBookings();
             
             return Ok(bookings);
+        }
+
+        [HttpGet("GetById")]
+        public async Task<ActionResult<List<Booking>>> GetById(int id)
+        {
+            Booking booking = _bookingService.GetBooking(id);
+            //Get all services
+            booking.BookingServices = _bookingServiceService
+                .GetAll()
+                .Where(b => b.BookingId == booking.BookingId).ToList();
+            foreach (var b in booking.BookingServices){
+                b.Service = _serviceService.GetServiceById(b.ServiceId);
+                b.Service.BookingServices = null;
+            } 
+            //Get user
+            booking.User = _userRepository.Get(booking.UserId);
+            //Get room
+            booking.Room = _roomService.GetRoomById(booking.RoomId);
+            return Ok(booking);
         }
 
         [HttpGet("GetAllByUserId")]
@@ -76,16 +99,55 @@ namespace BirthdayParty.API.Controllers
         [HttpPost("Create")]
         public async Task<ActionResult<Booking>> Create([FromBody] BookingDTO bookingDTO)
         {
-            var book = _bookingService.CreateBooking(bookingDTO);
-
-            foreach(var serviceId in bookingDTO.ServiceIds)
+            //check booking
+            foreach(var serviceObj in bookingDTO.ServiceIds)
             {
+                if(serviceObj.Amount <= 0) return BadRequest(new {error = "Amount must be greater than 0"});
+            }
+            
+            if(bookingDTO.PartyDateTime < DateTime.Now) 
+                return BadRequest(new {error = "Party date time must be greater than current time"});
+
+            if(bookingDTO.PartyEndTime < DateTime.Now)
+                return BadRequest(new {error = "Party end time must be greater than current time"});
+            if(bookingDTO.PartyDateTime >= bookingDTO.PartyEndTime)
+                return BadRequest(new {error = "Party end time must be greater than party date time"});
+
+            var room = _roomService.GetRoomById(bookingDTO.RoomId);
+            if(room == null) return NotFound(new {});
+            if(room.RoomStatus == "Inactive"){
+                return BadRequest(new {error = "Room is not active"});
+            }
+            //check already have booking complete
+            var bookings = _bookingService.GetAllBookings()
+                .Where(b => b.RoomId == room.RoomId).ToList();
+            if(bookings.Any(b =>((bookingDTO.PartyDateTime >= b.PartyDateTime &&
+                bookingDTO.PartyDateTime <= b.PartyEndTime) || 
+                (bookingDTO.PartyEndTime >= b.PartyDateTime &&
+                bookingDTO.PartyEndTime <= b.PartyEndTime)) && 
+                (b.BookingStatus == "Deposit" || b.BookingStatus =="Paid" || 
+                 b.BookingStatus == "FullPaying" || b.BookingStatus == "DepositPaying")))
+            {
+                return BadRequest(new {error = "Room is already booked at this time"});
+            }
+
+            var book = _bookingService.CreateBooking(bookingDTO);
+            //calculate total price
+            decimal totalPrice = room.Price;
+            foreach(var serviceObj in bookingDTO.ServiceIds)
+            {
+                var service = _serviceService.GetServiceById(serviceObj.ServiceId);
+                totalPrice += service.ServicePrice * serviceObj.Amount;
                 var bookingService = new BookingService{
                     BookingId = book.BookingId,
-                    ServiceId = serviceId,
+                    ServiceId = serviceObj.ServiceId,
+                    Amount = serviceObj.Amount
                 };
                 _bookingServiceService.Add(bookingService);
             }
+            book.TotalPrice = totalPrice;
+
+            _bookingService.UpdateBooking(book);
 
             return Ok(book);
         }
@@ -93,11 +155,12 @@ namespace BirthdayParty.API.Controllers
         [HttpPut("Update")]
         public async Task<ActionResult<Booking>> UpdateBooking([FromBody] BookingDTO bookingDTO)
         {
-            foreach(var serviceId in bookingDTO.ServiceIds)
+            foreach(var service in bookingDTO.ServiceIds)
             {
                 var bookingService = new BookingService{
                     BookingId = bookingDTO.BookingId.Value,
-                    ServiceId = serviceId,
+                    ServiceId = service.ServiceId,
+                    Amount = service.Amount
                 };
                 _bookingServiceService.Update(bookingService);
             }
