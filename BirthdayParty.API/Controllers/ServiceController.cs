@@ -32,6 +32,11 @@ namespace BirthdayParty.API.Controllers
         [HttpPut("UpdateService")]
         public async Task<ActionResult<Service>> UpdateService(ServiceUpdateDto updatedService)
         {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var existingService = _serviceService.GetServiceById(updatedService.ServiceId);
 
             if (existingService == null)
@@ -53,6 +58,11 @@ namespace BirthdayParty.API.Controllers
         [HttpDelete("DeleteService")]
         public async Task<ActionResult> DeleteService(int id)
         {
+            if(id <= 0)
+            {
+                return BadRequest();
+            }
+
             var result = _serviceService.DeleteService(id);
 
             if (result == null)
@@ -66,8 +76,14 @@ namespace BirthdayParty.API.Controllers
         [HttpPost("CreateService")]
         public async Task<ActionResult<Service>> CreateService(ServiceCreateDto service)
         {
-            var s = _serviceService.CreateService(service);
-            return Ok(s);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _serviceService.CreateService(service);
+            return Ok();
         }
 
 		[HttpGet("GetServiceById")]
