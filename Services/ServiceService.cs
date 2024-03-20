@@ -31,14 +31,11 @@ namespace BirthdayParty.Services
 
         public Service UpdateService(ServiceUpdateDto updatedService)
         {
-            var service = new Service
-            {
-                ServiceId = updatedService.ServiceId,
-                PackageId = updatedService.PackageId,
-                ServiceName = updatedService.ServiceName,
-                ServicePrice = updatedService.ServicePrice,
-                Description = updatedService.ServiceDescription,
-            };
+            var service = serviceRepository.Get(updatedService.ServiceId);
+            service.PackageId = updatedService.PackageId;
+            service.ServiceName = updatedService.ServiceName;
+            service.ServicePrice = updatedService.ServicePrice;
+            service.Description = updatedService.ServiceDescription;
             return serviceRepository.Update(service);
         }
 

@@ -1,5 +1,6 @@
 using BirthdayParty.Models;
 using BirthdayParty.Models.DTOs;
+using BirthdayParty.Services;
 using BirthdayParty.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -75,6 +76,7 @@ namespace BirthdayParty.API.Controllers
         [HttpPost("CreateService")]
         public async Task<ActionResult<Service>> CreateService(ServiceCreateDto service)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -83,5 +85,17 @@ namespace BirthdayParty.API.Controllers
             _serviceService.CreateService(service);
             return Ok();
         }
-    }
+
+		[HttpGet("GetServiceById")]
+		public async Task<ActionResult<Service>> GetServiceById(int id)
+		{
+			Service service = _serviceService.GetServiceById(id);
+
+			if (service == null)
+			{
+				return NotFound();
+			}
+			return Ok(service);
+		}
+	}
 }
