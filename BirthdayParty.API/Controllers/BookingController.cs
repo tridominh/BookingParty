@@ -102,21 +102,21 @@ namespace BirthdayParty.API.Controllers
             //check booking
             foreach(var serviceObj in bookingDTO.ServiceIds)
             {
-                if(serviceObj.Amount <= 0) return BadRequest(new {error = "Amount must be greater than 0"});
+                if(serviceObj.Amount <= 0) return BadRequest("Amount must be greater than 0");
             }
             
             if(bookingDTO.PartyDateTime < DateTime.Now) 
-                return BadRequest(new {error = "Party date time must be greater than current time"});
+                return BadRequest("Party date time must be greater than current time");
 
             if(bookingDTO.PartyEndTime < DateTime.Now)
-                return BadRequest(new {error = "Party end time must be greater than current time"});
+                return BadRequest("Party end time must be greater than current time");
             if(bookingDTO.PartyDateTime >= bookingDTO.PartyEndTime)
-                return BadRequest(new {error = "Party end time must be greater than party date time"});
+                return BadRequest("Party end time must be greater than party date time");
 
             var room = _roomService.GetRoomById(bookingDTO.RoomId);
             if(room == null) return NotFound(new {});
             if(room.RoomStatus == "Inactive"){
-                return BadRequest(new {error = "Room is not active"});
+                return BadRequest("Room is not active");
             }
             //check already have booking complete
             var bookings = _bookingService.GetAllBookings()
@@ -128,7 +128,7 @@ namespace BirthdayParty.API.Controllers
                 (b.BookingStatus == "Deposit" || b.BookingStatus =="Paid" || 
                  b.BookingStatus == "FullPaying" || b.BookingStatus == "DepositPaying")))
             {
-                return BadRequest(new {error = "Room is already booked at this time"});
+                return BadRequest("Room is already booked at this time");
             }
 
             var book = _bookingService.CreateBooking(bookingDTO);

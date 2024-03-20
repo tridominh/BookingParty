@@ -14,7 +14,7 @@ namespace BirthdayParty.Models.DTOs
 
         [Required(ErrorMessage = "Price is required")]
         [RegularExpression("^[0-9]+$", ErrorMessage = "Price must be a number")]
-        [Range(1, 500, ErrorMessage = "Price must be between 1 and 500")]
+        [Range(1, 2000000, ErrorMessage = "Price must be between 1 and 2.000.000")]
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Capacity is required")]
