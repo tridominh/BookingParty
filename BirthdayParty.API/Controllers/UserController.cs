@@ -25,11 +25,53 @@ namespace BirthdayParty.API.Controllers
                 IUserService userService)
         {
             _logger = logger;
+            _manager = manager;
             _signIn = signIn;
             _manager = manager;
             _jwtService = jwtService;
             _roleManager = roleManager;
             this.userService = userService;
+        }
+
+        [HttpPost("CreateHostUser")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<UserDTO>> CreateHostUser(RegisterDTO registerDTO)
+        {
+            var existingUser = await _manager.FindByEmailAsync(registerDTO.Email);
+            if (existingUser != null)
+            {
+                return BadRequest("Email already exists!!!");
+            }
+
+            var user = new User
+            {
+                UserName = registerDTO.Name,
+                Email = registerDTO.Email,
+                EmailConfirmed = true
+            };
+            var result = await _manager.CreateAsync(user, registerDTO.Password);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            var roleExists = await _roleManager.RoleExistsAsync(RoleEnum.Host.ToString());
+            if (!roleExists)
+            {
+                await _roleManager.CreateAsync(new Role(RoleEnum.Host.ToString()));
+            }
+
+            await _manager.AddToRoleAsync(user, RoleEnum.Host.ToString());
+
+            var userDTO = new UserDTO
+            {
+                Name = user.UserName,
+                Email = user.Email,
+                Token = _jwtService.CreateJwt(user, RoleEnum.Host.ToString())
+            };
+
+            return Ok(userDTO);
         }
 
         [HttpPost("Login")]

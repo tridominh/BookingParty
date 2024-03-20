@@ -106,7 +106,7 @@ namespace BirthdayParty.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingRoom = _roomService.GetAllRooms().Where(r => r.RoomNumber == room.RoomNumber);
+            var existingRoom = _roomService.GetAllRooms().Where(r => r.RoomNumber == room.RoomNumber).FirstOrDefault();
             if (existingRoom != null)
             {
                 return Conflict("RoomNumber already exists");
