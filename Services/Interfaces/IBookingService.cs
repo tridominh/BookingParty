@@ -13,6 +13,8 @@ namespace BirthdayParty.Services.Interfaces
 
         Booking UpdateBooking(BookingDTO booking);
 
+        Booking UpdateBooking(Booking booking);
+
         Booking UpdateBookingStatus(int id, string status);
 
         Booking DeleteBooking(int id);

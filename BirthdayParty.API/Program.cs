@@ -40,6 +40,9 @@ builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Services DI 
 //builder.Services.AddScoped<IServiceBookingService, ServiceBookingService>();
+builder.Services.Configure<MomoConfig>(
+    builder.Configuration.GetSection("Momo")
+);
 builder.Services.AddScoped<MomoService>();
 builder.Services.AddScoped<IPackageService, PackageService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();

@@ -33,6 +33,7 @@ namespace BirthdayParty.Services
                 RoomId = booking.RoomId,
                 BookingDate = DateTime.Now,
                 PartyDateTime = booking.PartyDateTime,
+                PartyEndTime = booking.PartyEndTime,
                 BookingStatus = booking.BookingStatus,
                 Feedback = booking.Feedback,
             };
@@ -54,6 +55,11 @@ namespace BirthdayParty.Services
             _bookingRepository.Update(existingBooking);
 
             return existingBooking;
+        }
+
+        public Booking UpdateBooking(Booking booking){
+            _bookingRepository.Update(booking);
+            return booking;
         }
 
         public Booking UpdateBookingStatus(int id, string status)
